@@ -1,7 +1,5 @@
 version: "3.9"
 
-# spins up everything, just run docker compose up and ur good
-
 services:
 
   postgres:

@@ -1,5 +1,3 @@
--- all tables for the platform, postgres runs this on first startup
-
 CREATE TABLE IF NOT EXISTS customers (
     customer_id     SERIAL PRIMARY KEY,
     name            VARCHAR(100) NOT NULL,
@@ -35,13 +33,11 @@ CREATE TABLE IF NOT EXISTS recommendations (
     created_at          TIMESTAMP DEFAULT NOW()
 );
 
--- indexes so queries dont die when data gets big
 CREATE INDEX IF NOT EXISTS idx_transactions_customer ON transactions(customer_id);
 CREATE INDEX IF NOT EXISTS idx_predictions_customer ON predictions(customer_id);
 CREATE INDEX IF NOT EXISTS idx_recommendations_customer ON recommendations(customer_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
 
--- some seed data so the dashboard isnt empty on first run
 INSERT INTO customers (name, email, age, location, join_date) VALUES
     ('Alice Johnson',  'alice@example.com',  29, 'New York',    '2023-01-15'),
     ('Bob Smith',      'bob@example.com',    34, 'Los Angeles', '2023-03-22'),
