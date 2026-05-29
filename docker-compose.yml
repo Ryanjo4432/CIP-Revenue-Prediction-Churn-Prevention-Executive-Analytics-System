@@ -1,0 +1,76 @@
+version: "3.9"
+
+# spins up everything, just run docker compose up and ur good
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: cip_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cip_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cip_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cip_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/cip_db
+      SECRET_KEY: supersecretkey123
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - cip_network
+    volumes:
+      - ./backend:/app
+
+  ml_service:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: cip_ml
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/cip_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+    networks:
+      - cip_network
+    volumes:
+      - ./ml:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cip_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - cip_network
+
+volumes:
+  postgres_data:
+
+networks:
+  cip_network:
+    driver: bridge
